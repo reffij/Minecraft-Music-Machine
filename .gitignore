@@ -1,0 +1,5 @@
+.mypt_cache/*
+./code/.mppy_chach/*
+./code/__pycache__/*
+./code/output.txt
+coordinates.csv
