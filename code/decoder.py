@@ -151,10 +151,10 @@ def read_header(raw_data: bytes) -> dict[str, Any]:
 def generate_lists (data: bytes, 
                     index: int, 
                     song_tempo: int, 
-                    song_length: int) -> list[list[list[int]]]:
+                    song_length: int) -> list[list[list[list[int]]]]:
     tick = -1
     modulus = song_tempo // 250 #1-8
-    song:list[list[list[int]]] = [[[[] for _ in range(25)] for _ in range(modulus)] \
+    song:list[list[list[list[int]]]] = [[[[] for _ in range(25)] for _ in range(modulus)] \
             for _ in range(16)] #instrument -> mod_class -> note -> class_tick
 
     #0 = Piano (Air)
@@ -192,11 +192,11 @@ def generate_lists (data: bytes,
 
     return song
 
-def list_to_unsplit_shulker (li: list[list[list[int]]]) -> list[list[list[int]]]:
-    
-    res = []
+def list_to_unsplit_shulker (li: list[int]) -> list[int]:
+
+    res: list[int] = []
     last_num = 0
-    
+
     for num in li:
         diff = num - last_num
 
@@ -214,7 +214,7 @@ def list_to_unsplit_shulker (li: list[list[list[int]]]) -> list[list[list[int]]]
     return res
 
 
-def unsplit_shulker_to_split_shulker (li: list[list[list[int]]], res: list[list[list[list[int]]]]) -> list[list[list[list[int]]]]:
+def unsplit_shulker_to_split_shulker (li: list[int], res: list[list[int]]) -> list[list[int]]:
 
     if len(li) <= 27:
         res.append(li)
@@ -233,7 +233,7 @@ def unsplit_shulker_to_split_shulker (li: list[list[list[int]]], res: list[list[
     return res
 
 
-def generate_item_id (li: list[list[list[int]]]) -> str:
+def generate_item_id (li: list[int]) -> str:
     res = '/give @p shulker_box[container=['
 
     if li[-1] == 0:
@@ -295,7 +295,6 @@ def decode(directory: str) -> str:
         header_data["song_tempo"],
         header_data["song_length"]
     )
-    print('\n')
 
     for i in range(len(nd_array)):    
         for c in range(len(nd_array[i])):
@@ -308,8 +307,11 @@ def decode(directory: str) -> str:
 
                     if shulker_li == []:
                         res += "WTF \n"
+                        raise ValueError(f"Error at [{i}, {c}, {n}] not machine compatitable, note must have a period of four rests to switch shulkers")
                     elif shulker_li[-1][-1] != 1:
                         res += "WTF WTF \n"
+                        raise ValueError(f"Error at [{i}, {c}, {n}] not machine compatitable, note must have a period of four rests to switch shulkers")
+
 
                     num = 1
                     for shulkers in unsplit_shulker_to_split_shulker(list_to_unsplit_shulker(nd_array[i][c][n]), []):
